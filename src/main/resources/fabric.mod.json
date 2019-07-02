@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "autogg",
   "version": "3.0.0",
-
+  "side": "client",
   "name": "AutoGG",
   "description": "Does as it says",
   "authors": [
@@ -17,9 +17,9 @@
   "license": "CC0-1.0",
   "icon": "assets/autogg/icon.png",
 
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
-    "main": [
+    "client": [
       "pw._2pi.autogg.gg.AutoGG"
     ]
   },
@@ -33,5 +33,8 @@
   },
   "suggests": {
     "flamingo": "*"
+  },
+  "custom": {
+    "modmenu:clientsideOnly": true
   }
 }

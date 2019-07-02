@@ -15,6 +15,8 @@ import java.util.Map;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
 import static net.minecraft.server.command.CommandManager.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
+import static com.mojang.brigadier.arguments.BoolArgumentType.*;
+
 import pw._2pi.autogg.gg.AutoGG;
 
 import java.util.List;
@@ -28,35 +30,65 @@ public class GGCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
 
-        dispatcher.register(literal("autogg")
-                .executes(ctx -> {
-                    AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("§cUsage: /autogg [delay <seconds> | toggle]"));
-                    return 0;
-                })
-                .then(argument("option", greedyString())
+        dispatcher.register(
+            literal("autogg")
+                .then(
+                        literal("delay")
+                                .then(
+                                        argument("seconds", integer(1,5))
+                                .executes(ctx -> {
+                                    AutoGG.getInstance().setDelay(getInteger(ctx, "seconds"));
+                                    ConfigUtil.setConfigDelay();
+                                    ctx.getSource().sendFeedback(new LiteralText("§7AutoGG delay is now " + AutoGG.getInstance().getDelay()), true);
+                                    return 1;
+                                }))
                         .executes(ctx -> {
-                            switch(getString(ctx, "option")) {
-                                case "delay":
-                                    AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("AutoGG delay is currently " + AutoGG.getInstance().getDelay()));
-                                    return 1;
-                                case "toggle":
-                                    AutoGG.getInstance().setToggled();
-                                    AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("AutoGG is now " + (AutoGG.getInstance().isToggled() ? "§2on" : "§4off")));
-                                    return 1;
-                                default:
-                                    ctx.getSource().sendFeedback(new LiteralText("§cUsage: /autogg [delay <seconds> | toggle]"), true);
-                                    return 0;
-                            }
-                        }).then(argument("delay", integer(1,5)).executes(ctx -> {
-                            if (getString(ctx, "option") == "delay") {
-                                AutoGG.getInstance().setDelay(getInteger(ctx, "delay"));
-                                ConfigUtil.setConfigDelay();
-                                ctx.getSource().sendFeedback(new LiteralText("§7AutoGG delay is now" + AutoGG.getInstance().getDelay()), true);
-                                return 1;
-                            } else {
-                                AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("§cUsage: /autogg [delay <seconds> | toggle]"));
-                                return 0;
-                            }
-                        }))));
+                            ctx.getSource().sendFeedback(new LiteralText("AutoGG delay is currently " + AutoGG.getInstance().getDelay()), true);
+                            return 1;
+                        })
+                )
+                .then(
+                        literal("toggle")
+                .executes(ctx -> {
+                    AutoGG.getInstance().setToggled();
+                    ctx.getSource().sendFeedback(new LiteralText("AutoGG is now " + (AutoGG.getInstance().isToggled() ? "§2on" : "§4off")), true);
+                    return 1;
+            }))
+        );
     }
 }
+
+/*
+
+                    argument("toggle", greedyString())
+                    .executes(ctx -> {
+                        switch(getString(ctx, "option")) {
+                            case "delay":
+                                AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("AutoGG delay is currently " + AutoGG.getInstance().getDelay()));
+                                return 1;
+                            case "toggle":
+                                AutoGG.getInstance().setToggled();
+                                AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("AutoGG is now " + (AutoGG.getInstance().isToggled() ? "§2on" : "§4off")));
+                                return 1;
+                            default:
+                                ctx.getSource().sendFeedback(new LiteralText("§cUsage: /autogg [delay <seconds> | toggle]"), true);
+                                return 0;
+                        }
+                    })
+                        .then(
+                        argument("delay", integer(1,5))
+                            .executes(
+                                    ctx -> {
+                                if (getString(ctx, "option") == "delay") {
+                                    AutoGG.getInstance().setDelay(getInteger(ctx, "delay"));
+                                    ConfigUtil.setConfigDelay();
+                                    ctx.getSource().sendFeedback(new LiteralText("§7AutoGG delay is now" + AutoGG.getInstance().getDelay()), true);
+                                    return 1;
+                                } else {
+                                    AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("§cUsage: /autogg [delay <seconds> | toggle]"));
+                                return 0;
+                                }
+                            })
+                        )
+
+ */

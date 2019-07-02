@@ -10,11 +10,15 @@ import net.minecraft.client.gui.hud.ChatHud;
 
 @Mixin(ChatHud.class)
 public class MixinChatHud {
-    @Inject(method = "addMessage(Lnet/minecraft/text/Text;)V", at= @At("TAIL"))
-    private static void onAddMessage(Text message, CallbackInfo callbackInfo) {
+    @Inject(method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", at= @At("TAIL"))
+    public void onAddMessage(Text message, int id, int timestamp, boolean what, CallbackInfo callbackInfo) {
+
+        System.out.println(message.asString());
+
         if (!AutoGG.getInstance().isHypixel() || !AutoGG.getInstance().isToggled() || AutoGG.getInstance().isRunning() || AutoGG.getInstance().getTriggers().isEmpty()) {
             return;
         }
+
 
         if (AutoGG.getInstance().getTriggers().stream().anyMatch(trigger -> message.asString().contains(trigger.toString())) && message.asString().startsWith(" ")) {
             AutoGG.getInstance().setRunning(true);
