@@ -1,49 +1,51 @@
 package dev.xyze.autogg.commands;
 
 
-import com.google.common.collect.Iterables;
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.server.command.ServerCommandSource;
+import io.github.cottonmc.clientcommands.CottonClientCommandSource;
 import net.minecraft.text.LiteralText;
-import pw._2pi.autogg.util.ConfigUtil;
-
-import java.util.Map;
-
+import dev.xyze.autogg.util.ConfigUtil;
+import dev.xyze.autogg.util.ConfigUtil.AutoGGConfig;
 import static com.mojang.brigadier.arguments.StringArgumentType.*;
-import static net.minecraft.server.command.CommandManager.*;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.*;
-import static com.mojang.brigadier.arguments.BoolArgumentType.*;
+import static io.github.cottonmc.clientcommands.ArgumentBuilders.literal;
+import static io.github.cottonmc.clientcommands.ArgumentBuilders.argument;
 
 import pw._2pi.autogg.gg.AutoGG;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-// fabric chat api is very undocumented, especially on the argument side of things
+// too lazy to setup menu lol
 public class GGCommand {
-
-    // since fabric has such little api that I literally don't know how to do colors
-    //private String ColorCharacter = "§";
-
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
-
+    public static void register(CommandDispatcher<CottonClientCommandSource> dispatcher) {
         dispatcher.register(
-            literal("autogg")
+                literal("autogg")
                 .then(
                         literal("delay")
                                 .then(
                                         argument("seconds", integer(1,5))
                                 .executes(ctx -> {
                                     AutoGG.getInstance().setDelay(getInteger(ctx, "seconds"));
-                                    ConfigUtil.setConfigDelay();
-                                    ctx.getSource().sendFeedback(new LiteralText("§7AutoGG delay is now " + AutoGG.getInstance().getDelay()), true);
+                                    AutoGGConfig config = ConfigUtil.getConfig();
+                                    config.delay = AutoGG.getInstance().getDelay();
+                                    ConfigUtil.setConfig(config);
+                                    ctx.getSource().sendFeedback(new LiteralText("§7AutoGG delay is now " + AutoGG.getInstance().getDelay()));
                                     return 1;
                                 }))
                         .executes(ctx -> {
-                            ctx.getSource().sendFeedback(new LiteralText("AutoGG delay is currently " + AutoGG.getInstance().getDelay()), true);
+                            ctx.getSource().sendFeedback(new LiteralText("AutoGG delay is currently " + AutoGG.getInstance().getDelay()));
+                            return 1;
+                        })
+                )
+                .then(
+                        literal("message")
+                                .then(argument("message", greedyString()).executes(ctx -> {
+                                    AutoGG.getInstance().setMessage(getString(ctx, "message"));
+                                    AutoGGConfig config = ConfigUtil.getConfig();
+                                    config.message = AutoGG.getInstance().getMessage();
+                                    ConfigUtil.setConfig(config);
+                                    ctx.getSource().sendFeedback(new LiteralText("§7AutoGG message is now " + AutoGG.getInstance().getMessage()));
+                                    return 1;                                }))
+                        .executes(ctx -> {
+                            ctx.getSource().sendFeedback(new LiteralText("AutoGG message is currently " + AutoGG.getInstance().getMessage()));
                             return 1;
                         })
                 )
@@ -51,44 +53,13 @@ public class GGCommand {
                         literal("toggle")
                 .executes(ctx -> {
                     AutoGG.getInstance().setToggled();
-                    ctx.getSource().sendFeedback(new LiteralText("AutoGG is now " + (AutoGG.getInstance().isToggled() ? "§2on" : "§4off")), true);
+                    ctx.getSource().sendFeedback(new LiteralText("AutoGG is now " + (AutoGG.getInstance().isToggled() ? "§2on" : "§4off")));
                     return 1;
-            }))
+                }))
+                .executes(ctx -> {
+                    ctx.getSource().sendFeedback(new LiteralText("AutoGG is currently " + (AutoGG.getInstance().isToggled() ? "§2on" : "§4off")));
+                    return 1;
+                })
         );
     }
 }
-
-/*
-
-                    argument("toggle", greedyString())
-                    .executes(ctx -> {
-                        switch(getString(ctx, "option")) {
-                            case "delay":
-                                AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("AutoGG delay is currently " + AutoGG.getInstance().getDelay()));
-                                return 1;
-                            case "toggle":
-                                AutoGG.getInstance().setToggled();
-                                AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("AutoGG is now " + (AutoGG.getInstance().isToggled() ? "§2on" : "§4off")));
-                                return 1;
-                            default:
-                                ctx.getSource().sendFeedback(new LiteralText("§cUsage: /autogg [delay <seconds> | toggle]"), true);
-                                return 0;
-                        }
-                    })
-                        .then(
-                        argument("delay", integer(1,5))
-                            .executes(
-                                    ctx -> {
-                                if (getString(ctx, "option") == "delay") {
-                                    AutoGG.getInstance().setDelay(getInteger(ctx, "delay"));
-                                    ConfigUtil.setConfigDelay();
-                                    ctx.getSource().sendFeedback(new LiteralText("§7AutoGG delay is now" + AutoGG.getInstance().getDelay()), true);
-                                    return 1;
-                                } else {
-                                    AutoGG.getInstance().getMinecraft().inGameHud.getChatHud().addMessage(new LiteralText("§cUsage: /autogg [delay <seconds> | toggle]"));
-                                return 0;
-                                }
-                            })
-                        )
-
- */

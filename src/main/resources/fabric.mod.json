@@ -21,6 +21,9 @@
   "entrypoints": {
     "client": [
       "pw._2pi.autogg.gg.AutoGG"
+    ],
+    "cotton-client-commands": [
+      "pw._2pi.autogg.gg.AutoGG"
     ]
   },
   "mixins": [
