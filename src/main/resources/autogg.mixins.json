@@ -6,7 +6,9 @@
     "MixinChatHud"
   ],
   "client": [
-    "MixinClientConnection"
+    "MixinClientConnection",
+    "MixinConnectScreen",
+    "MixinDisconnectedScreen"
   ],
   "injectors": {
     "defaultRequire": 1
